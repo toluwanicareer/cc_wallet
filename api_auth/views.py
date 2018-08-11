@@ -100,11 +100,11 @@ def send_ether(request):
 #TODO: remember to write a cron job to update the status of the transacrtion
 
 @csrf_exempt
-@api_view(["POST"])
+@api_view(["GET"])
 def get_address(request):
     response=dict()
     try:
-        address=Wallet.objects.get(user=request.user)
+        address=request.user.wallet.address
         data={'address':address,'message':'Successful'}
         return Response(data, status=HTTP_200_OK)
     except Wallet.DoesNotExist:
