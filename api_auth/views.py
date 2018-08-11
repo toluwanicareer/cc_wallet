@@ -142,7 +142,7 @@ def get_account_detail(request):
 @api_view(["GET"])
 def get_transactions(request):
     transactions=Transaction.objects.filter(user=request.user)
-    txs = [{'tx_hash':tx.tx_hash, 'amount':tx.amount} for tx in transactions]
+    txs = [{'to':tx.to_addr, 'tx_hash':tx.tx_hash, 'amount':Web3.fromWei(int(tx.amount_in_wei),'ether')} for tx in transactions]
     data={'transaction_lists':txs}
     return Response(data, status=HTTP_200_OK)
 
