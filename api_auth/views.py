@@ -31,7 +31,7 @@ def login(request):
         return Response({'error': 'Invalid Credentials'},
                         status=HTTP_404_NOT_FOUND)
     token, _ = Token.objects.get_or_create(user=user)
-    return Response({'token': token.key},
+    return Response({'token': token.key, 'status':200, 'message':'successful'},
                     status=HTTP_200_OK)
 
 @csrf_exempt
@@ -47,16 +47,16 @@ def signup(request):
     if status:  # email does not exist
         try:
             user = User.objects.get(username=username)
-            return Response({'message': 'Username Already Exist. Please try another'})
+            return Response({'message': 'Username Already Exist. Please try another', 'status':400})
         except User.DoesNotExist:
             user = User.objects.create_user(username=username, is_active=True, password=password,
                                             first_name=firstname, last_name=lastname, email=email)
             user.save()
             address=create_wallet(user)
-            return Response({'message:Successful'}, status=HTTP_200_OK)
+            return Response({'message':'Successful', status:200}, status=HTTP_200_OK)
 
     else:
-        return Response({'message':'Email already exist'})
+        return Response({'message':'Email already exist', 'status':400})
 
 
 def get_eth_balance(user):
@@ -93,7 +93,7 @@ def send_ether(request):
     tx_hash=web3.eth.sendTransaction( {'to': address,'from': request.user.wallet.address,'value': value})
     tx=Transaction(from_addr=request.user.wallet.address, to_addr=address,tx_hash=tx_hash.hex(), amount_in_wei=value)
     tx.save()
-    data={'message':'Successful', 'tx_hash':tx_hash.hex()}
+    data={'message':'Successful', 'status':200, 'tx_hash':tx_hash.hex()}
     #pdb.set_trace()
     return Response(data, status=HTTP_200_OK)
 
@@ -105,11 +105,12 @@ def get_address(request):
     response=dict()
     try:
         address=request.user.wallet.address
-        data={'address':address,'message':'Successful'}
+        data={'address':address,'message':'Successful', 'status':'200'}
         return Response(data, status=HTTP_200_OK)
     except Wallet.DoesNotExist:
         #it means user was not set up properly, this should never happen
         response['message']='Address not found'
+        response['status']='404'
         return Response(response, status=HTTP_404_NOT_FOUND)
 
 
@@ -125,7 +126,7 @@ def send_token(request):
     })
     tx = Transaction(from_addr=request.user.wallet.address, to_addr=_address, tx_hash=tx_hash.hex(), currency='cc', amount_in_wei=_amount)
     tx.save()
-    data = {'message': 'Successful', 'tx_hash': tx_hash.hex()}
+    data = {'message': 'Successful', 'tx_hash': tx_hash.hex(),'status':'200'}
     # pdb.set_trace()
     return Response(data, status=HTTP_200_OK)
 
@@ -135,7 +136,7 @@ def send_token(request):
 def get_account_detail(request):
     ether_balance=get_eth_balance(request.user)
     cc_balance=get_contract_balance(request.user)
-    data={'eth_balance': ether_balance, 'cc_balance':cc_balance}
+    data={'eth_balance': ether_balance, 'cc_balance':cc_balance, 'message':'Successful', 'status':'200'}
     return Response(data, status=HTTP_200_OK)
 
 @csrf_exempt
@@ -143,7 +144,7 @@ def get_account_detail(request):
 def get_transactions(request):
     transactions=Transaction.objects.filter(user=request.user)
     txs = [{'to':tx.to_addr, 'tx_hash':tx.tx_hash, 'amount':Web3.fromWei(int(tx.amount_in_wei),'ether')} for tx in transactions]
-    data={'transaction_lists':txs}
+    data={'transaction_lists':txs, 'message':'successful', 'status':200}
     return Response(data, status=HTTP_200_OK)
 
 def chk_email(email):
