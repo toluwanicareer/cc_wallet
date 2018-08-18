@@ -37,9 +37,13 @@ class StoreListCreateView(generics.ListCreateAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
 
+    def perform_create(self, request, serializer):
+        serializer.save(owner=request.user)
+
 class StoreDetailUpdate(generics.RetrieveUpdateDestroyAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
+
 
 
 
