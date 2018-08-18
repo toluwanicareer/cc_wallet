@@ -79,23 +79,23 @@ def unlock_account(add, passphrase):
     status=web3.personal.unlockAccount(add,passphrase=passphrase)
     return status
 
-
-
 @csrf_exempt
 @api_view(["POST"])
 def send_ether(request):
     address=request.data.get('address')
-
     amount=request.data.get('amount')
     web3=Web3(Web3.HTTPProvider(settings.PROVIDER))
     value=web3.toWei(float(amount), 'ether')
-    #TODO: set_default_account to bear the cost of gas
-    tx_hash=web3.eth.sendTransaction( {'to': address,'from': request.user.wallet.address,'value': value})
-    tx=Transaction(from_addr=request.user.wallet.address, to_addr=address,tx_hash=tx_hash.hex(), amount_in_wei=value)
-    tx.save()
-    data={'message':'Successful', 'status':200, 'tx_hash':tx_hash.hex()}
-    #pdb.set_trace()
-    return Response(data, status=HTTP_200_OK)
+    eth_bal=get_eth_balance(request.user)
+    if eth_bal >= value:
+        tx_hash=web3.eth.sendTransaction( {'to': address,'from': request.user.wallet.address,'value': value})
+        tx=Transaction(from_addr=request.user.wallet.address, to_addr=address,tx_hash=tx_hash.hex(), amount_in_wei=value)
+        tx.save()
+        data={'message':'Successful', 'status':200, 'tx_hash':tx_hash.hex()}
+        #pdb.set_trace()
+        return Response(data, status=HTTP_200_OK)
+    else:
+        return Response({'message':'Not enough balance', 'status':400})
 
 #TODO: remember to write a cron job to update the status of the transacrtion
 
@@ -118,17 +118,22 @@ def get_address(request):
 @csrf_exempt
 @api_view(["POST"])
 def send_token(request):
+    #TODO : Not yet tested
     _amount=request.data.get('amount')
     _address=request.data.get('address')
-    contract=get_contract()
-    tx_hash=contract.functions.transfer(_address,_amount).send({
-        'from':request.user.wallet.address,
-    })
-    tx = Transaction(from_addr=request.user.wallet.address, to_addr=_address, tx_hash=tx_hash.hex(), currency='cc', amount_in_wei=_amount)
-    tx.save()
-    data = {'message': 'Successful', 'tx_hash': tx_hash.hex(),'status':'200'}
-    # pdb.set_trace()
-    return Response(data, status=HTTP_200_OK)
+    cc_bal = get_contract_balance(request.user)
+    if cc_bal >= _amount: #chk current balance
+        contract=get_contract()
+        tx_hash=contract.functions.transfer(_address,_amount).send({
+            'from':request.user.wallet.address,
+        })
+        tx = Transaction(from_addr=request.user.wallet.address, to_addr=_address, tx_hash=tx_hash.hex(), currency='cc', amount_in_wei=_amount)
+        tx.save()
+        data = {'message': 'Successful', 'tx_hash': tx_hash.hex(),'status':'200'}
+        # pdb.set_trace()
+        return Response(data, status=HTTP_200_OK)
+    else:
+        return Response({'status':400, 'message':'Insufficient Balance'})
 
 
 @csrf_exempt
@@ -142,10 +147,13 @@ def get_account_detail(request):
 @csrf_exempt
 @api_view(["GET"])
 def get_transactions(request):
+    #TODO : redo this class, make it have pagination
     transactions=Transaction.objects.filter(user=request.user)
     txs = [{'to':tx.to_addr, 'tx_hash':tx.tx_hash, 'amount':Web3.fromWei(int(tx.amount_in_wei),'ether')} for tx in transactions]
     data={'transaction_lists':txs, 'message':'successful', 'status':200}
     return Response(data, status=HTTP_200_OK)
+
+
 
 def chk_email(email):
     user=User.objects.filter(email=email)
