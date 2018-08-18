@@ -28,7 +28,7 @@ def login(request):
                         status=HTTP_400_BAD_REQUEST)
     user = authenticate(username=username, password=password)
     if not user:
-        return Response({'error': 'Invalid Credentials'},
+        return Response({'message': 'Invalid Credentials', 'status':400},
                         status=HTTP_404_NOT_FOUND)
     token, _ = Token.objects.get_or_create(user=user)
     return Response({'token': token.key, 'status':200, 'message':'successful'},
