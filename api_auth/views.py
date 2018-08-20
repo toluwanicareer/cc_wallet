@@ -149,7 +149,7 @@ def get_account_detail(request):
 def get_transactions(request):
     #TODO : redo this class, make it have pagination
     transactions=Transaction.objects.filter(user=request.user)
-    txs = [{'to':tx.to_addr, 'tx_hash':tx.tx_hash, 'amount':Web3.fromWei(int(tx.amount_in_wei),'ether')} for tx in transactions]
+    txs = [{'to':tx.to_addr, 'tx_hash':tx.tx_hash, 'amount':Web3.fromWei(int(tx.amount_in_wei),'ether'), 'coin':tx.currency} for tx in transactions]
     data={'transaction_lists':txs, 'message':'successful', 'status':200}
     return Response(data, status=HTTP_200_OK)
 
