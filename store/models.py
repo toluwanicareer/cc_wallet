@@ -5,6 +5,9 @@ from rest_framework import serializers
 
 # Create your models here.
 
+class Cart(models.Model):
+    owner=models.ForeignKey(User, on_delete=models.CASCADE)
+
 class Store(models.Model):
     name=models.CharField(max_length=200)
     address=models.TextField()
@@ -19,10 +22,14 @@ class Store(models.Model):
         return self.name
 
 class Product(models.Model):
-    thumbnail=models.ImageField()
+    thumbnail=models.ImageField(null=True)
     name=models.CharField(max_length=200)
     price=models.CharField(max_length=200)
-    store=models.ForeignKey(Store, on_delete=models.CASCADE)
+    store=models.ForeignKey(Store, on_delete=models.CASCADE,null=True)
+    quantity=models.IntegerField(null=True)
+
+    def __str__(self):
+        return self.name
 
 class Order(models.Model):
     store=models.ForeignKey(Store, on_delete=models.CASCADE)
@@ -31,9 +38,10 @@ class Order(models.Model):
 
 class Items(models.Model):
     product=models.ForeignKey(Product, on_delete=models.CASCADE)
-    order=models.ForeignKey(Order, on_delete=models.CASCADE)
+    order=models.ForeignKey(Order,null=True, on_delete=models.CASCADE)
     quantity=models.IntegerField()
     cost=models.CharField(max_length=200)
+
 
 
 class StoreTransaction(models.Model):
@@ -43,3 +51,5 @@ class StoreTransaction(models.Model):
     to_addr=models.CharField(max_length=200)
     status=models.BooleanField(default=False)
     store=models.ForeignKey(Store, on_delete=models.CASCADE)
+
+
