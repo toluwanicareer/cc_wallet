@@ -63,8 +63,12 @@ def get_eth_balance(user):
     ether_balance=w3.eth.getBalance(user.wallet.address)
     return w3.fromWei(ether_balance,'ether')
 
+def get_web3():
+    web3 = Web3(Web3.HTTPProvider(settings.PROVIDER))
+    return web3
+
 def get_contract():
-    web3 = Web3(Web3.HTTPProvider('http://127.0.0.1:9545'))#TODO: change this to the settings configuration in production
+    web3=get_web3()
     add = web3.toChecksumAddress(settings.CONTRACT_ADDRESS)
     contract = web3.eth.contract(address=add, abi=settings.ABI)
     return contract
@@ -75,7 +79,7 @@ def get_contract_balance(user):
     return cc_bal
 
 def unlock_account(add, passphrase):
-    web3 = Web3(Web3.HTTPProvider(settings.PROVIDER))
+    web3 = get_web3()
     status=web3.personal.unlockAccount(add,passphrase=passphrase)
     return status
 
@@ -84,7 +88,7 @@ def unlock_account(add, passphrase):
 def send_ether(request):
     address=request.data.get('address')
     amount=request.data.get('amount')
-    web3=Web3(Web3.HTTPProvider(settings.PROVIDER))
+    web3=get_web3()
     value=web3.toWei(float(amount), 'ether')
     eth_bal=get_eth_balance(request.user)
     if web3.toWei(float(eth_bal), 'ether') >= value:
@@ -168,17 +172,15 @@ def create_wallet(user):
     user_wallets_count=Wallet.objects.filter(user=user)
     if user_wallets_count.exists():
         return False
-
     # create the wallet on the localhost node, so the node can manage it
-    address=w3.personal.newAccount(user.username)
+    web3=get_web3()
+    address=web3.personal.newAccount(user.username)
     wallet=Wallet(address=address, user=user)#create the wallet instance to store in database for future reference
     #unlock account for use
-    w3.personal.unlockAccount(address,passphrase=user.username)
+    web3.personal.unlockAccount(address,passphrase=user.username)
     #TODO: handle error, if unlock account is not successful
     wallet.save()
     return address
-
-
 
 @csrf_exempt
 @api_view(["GET"])
@@ -186,5 +188,3 @@ def sample_api(request):
     data = {'sample_data': 123}
     #pdb.set_trace()
     return Response(data, status=HTTP_200_OK)
-
-
