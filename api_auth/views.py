@@ -53,19 +53,20 @@ def signup(request):
                                             first_name=firstname, last_name=lastname, email=email)
             user.save()
             address=create_wallet(user)
-            return Response({'detail':'Successful', status:200}, status=HTTP_200_OK)
+            return Response({'detail':'Successful', 'status':200}, status=HTTP_200_OK)
 
     else:
         return Response({'detail':'Email already exist', 'status':400})
 
 
-def get_eth_balance(user):
-    ether_balance=w3.eth.getBalance(user.wallet.address)
-    return w3.fromWei(ether_balance,'ether')
-
 def get_web3():
     web3 = Web3(Web3.HTTPProvider(settings.PROVIDER))
     return web3
+
+def get_eth_balance(user):
+    web3=get_web3()
+    ether_balance=web3.eth.getBalance(user.wallet.address)
+    return w3.fromWei(ether_balance,'ether')
 
 def get_contract():
     web3=get_web3()

@@ -51,8 +51,7 @@ class StoreListCreateView(generics.ListCreateAPIView):
             serializer.save(owner=self.request.user)
         except:
             self.object=None
-
-
+            
 class ProductListCreateView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
 
