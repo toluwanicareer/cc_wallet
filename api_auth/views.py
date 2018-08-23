@@ -127,7 +127,7 @@ def send_token(request):
     _amount=request.data.get('amount')
     _address=request.data.get('address')
     cc_bal = get_contract_balance(request.user)
-    if cc_bal >= _amount: #chk current balance
+    if float(cc_bal) >= float(_amount): #chk current balance
         contract=get_contract()
         tx_hash=contract.functions.transfer(_address,_amount).send({
             'from':request.user.wallet.address,
