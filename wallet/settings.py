@@ -25,7 +25,7 @@ SECRET_KEY = 'gp_i$95n3$75xwyhnf0)v23)pupdt*f=wsr^8uneziycmx+uzd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['142.93.254.201', 'localhost']
 
 
 # Application definition
@@ -99,7 +99,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated', ),
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 20,
 }
 
 # Password validation
