@@ -20,7 +20,6 @@ Pillow==5.2.0
 pycryptodome==3.6.4
 pypiwin32==223
 pytz==2018.5
-pywin32==223
 requests==2.19.1
 rlp==1.0.2
 six==1.11.0
