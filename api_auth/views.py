@@ -66,7 +66,7 @@ def get_web3():
 def get_eth_balance(user):
     web3=get_web3()
     ether_balance=web3.eth.getBalance(user.wallet.address)
-    return w3.fromWei(ether_balance,'ether')
+    return web3.fromWei(ether_balance,'ether')
 
 def get_contract():
     web3=get_web3()
