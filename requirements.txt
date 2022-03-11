@@ -16,7 +16,7 @@ hexbytes==0.1.0
 idna==2.7
 lru-dict==1.1.6
 parsimonious==0.8.0
-Pillow==5.2.0
+Pillow==9.0.1
 pycryptodome==3.6.4
 pypiwin32==223
 pytz==2018.5
